@@ -1,0 +1,8 @@
+a	adventure() (line 7) and create_player() (line 56)
+b	Line 71
+c	Line 20
+d	adventure(), since lines 69 to 71 run first and call it
+e	Prints a prompt, waits for typed input, returns it as a string
+f	The else on line 32: health 75, mana 75, "A unique specialty I do not recognize! Intriguing..."
+g	Placeholders that .format() fills with the variable's value
+h	Line 53, return 0. Return a nonzero value and the loop on line 70 ends
