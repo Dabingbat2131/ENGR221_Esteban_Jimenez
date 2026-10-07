@@ -1,0 +1,196 @@
+Esteban Jimenez Sierra
+ENGR 221
+Homework 3: Sorting Algorithms
+
+==============================
+PART 1
+==============================
+
+1.2.a
+create_new_array() builds a brand new list using a list comprehension. It
+calls random.randint(0, Preferences.MAX_VAL) once for each spot, so you get
+a list of random whole numbers from 0 to MAX_VAL (which is 40). The length
+defaults to Preferences.NUM_ELEMENTS (20), but you can pass in a different
+length.
+
+1.2.b
+It gets created inside restart(). In controller.py, restart() gets called
+whenever you press s, i, or b to pick an algorithm, or r to restart the
+current one. It also gets called in the __main__ block of
+sorting_algorithms.py when timing the algorithms.
+
+1.2.c
+yield basically pauses the function and hands back a value (here, the two
+indices to highlight). The function remembers exactly where it stopped, so
+the next time it gets asked for a value it picks back up right after the
+yield instead of starting over. That turns selection_sort() into a generator
+that runs one step at a time.
+
+1.2.d
+restart() calls selection_sort() and saves the generator it returns in
+self.alg_method. get_next_step() calls next() on that generator, which runs
+selection_sort() up to its next yield and grabs the (outer_idx, inner_idx)
+it handed back. So every call to get_next_step() moves the sort forward by
+exactly one step. When selection_sort() finishes, next() raises
+StopIteration and get_next_step() resets both indices to -1.
+
+1.2.e
+Besides the array itself, draw() takes outer_idx and inner_idx, which are
+the indices of the carrots to highlight (outer shows in blue, inner in red;
+both default to -1 meaning nothing is highlighted). They get updated when
+get_next_step() runs, which happens when you press the right arrow or l, or
+every cycle when continuous mode is on (space). Right after that, the
+controller calls draw() with the updated array, outer_idx, and inner_idx, so
+the screen shows the newest step.
+
+==============================
+PART 2: Selection Sort
+==============================
+
+2.2.a
+Selection sort splits the list into a sorted part (left) and an unsorted
+part (right). Each pass, it scans the unsorted part, SELECTS the smallest
+item, and swaps it to the front of the unsorted part. That's why it's called
+selection sort: every pass it selects the next smallest item.
+
+2.2.b
+O(n^2). There are two nested loops: the outer loop runs n times and the
+inner loop runs up to n times for each one. That's about n * n / 2
+comparisons, which is O(n^2). It's O(n^2) no matter what, even if the list
+is already sorted, because the inner loop always scans everything left.
+
+2.2.c
+O(1). It sorts the list in place by swapping items inside self.array. The
+only extra storage is a few variables (n, i, j, min_idx), and that amount
+doesn't grow with the size of the list. No new list is made.
+
+==============================
+PART 3: Insertion Sort
+==============================
+
+3.1.a
+Insertion sort keeps a sorted part on the left. It takes the next item and
+INSERTS it into the right spot in the sorted part by sliding it left
+(swapping) until the item before it isn't bigger. It's like sorting cards in
+your hand one at a time.
+
+3.1.b
+O(n^2) in the worst case. There's a for loop over all n items, and inside
+it a while loop that can slide an item all the way back to the start (up to
+i swaps). In the worst case (list in reverse order) that's about n * n / 2
+swaps, so O(n^2). Best case (already sorted) the while loop never runs, so
+it's O(n).
+
+3.1.c
+O(1). It only swaps items inside the original list. The extra storage is
+just i and j, which doesn't change with the size of the list.
+
+==============================
+PART 4: Bubble Sort
+==============================
+
+4.1.a
+Bubble sort walks through the list comparing each pair of neighbors and
+swaps them if they're out of order. After each pass, the biggest item left
+has "bubbled up" to the end of the list, like a bubble rising to the top.
+That's why it's called bubble sort.
+
+4.1.b
+O(n^2). Two nested loops: the outer one runs n-1 times and the inner one
+runs up to n-1-i times. That adds up to about n * n / 2 comparisons, which
+is O(n^2).
+
+4.1.c
+O(1). It sorts in place by swapping neighbors inside A. The only extra
+storage is i and j, which doesn't grow with the size of the list.
+
+4.2
+Input A = [8, 1, 4, 2]. A[i] and A[j] are the values at those indices right
+before the comparison on that step. The last column is what gets printed
+after that step.
+
+ i  | j  | A[i] | A[j] | print(A)
+----|----|------|------|--------------
+N/A | N/A| N/A  | N/A  | [8, 1, 4, 2]
+ 0  | 0  |  8   |  8   | [1, 8, 4, 2]
+ 0  | 1  |  1   |  8   | [1, 4, 8, 2]
+ 0  | 2  |  1   |  8   | [1, 4, 2, 8]
+ 1  | 0  |  4   |  1   | [1, 4, 2, 8]
+ 1  | 1  |  4   |  4   | [1, 2, 4, 8]
+ 2  | 0  |  4   |  1   | [1, 2, 4, 8]
+
+4.3
+After pass i, the i biggest items are already locked into their final spots
+at the end of the list, because each pass bubbles the biggest remaining item
+all the way to the end. So comparing those last i items again would never
+cause a swap. Cutting off the inner loop with -i just skips comparisons that
+can't change anything, so the output is the same but it does less work.
+
+4.4.a
+Claude.
+
+4.4.b
+"Write a bubble_sort() function in Python that sorts a list of numbers in
+place. Don't use the built in sort()."
+
+4.4.c
+def bubble_sort(arr):
+    n = len(arr)
+    for i in range(n - 1):
+        swapped = False
+        for j in range(n - 1 - i):
+            if arr[j] > arr[j + 1]:
+                arr[j], arr[j + 1] = arr[j + 1], arr[j]
+                swapped = True
+        if not swapped:
+            break
+
+4.4.d
+Yes, it runs in place. It swaps items directly inside arr and doesn't create
+or return a new list.
+
+4.4.e
+Similarities: same two nested loops, the inner loop also uses n - 1 - i to
+skip the sorted end, and it compares and swaps neighbors the same way.
+Differences: it adds a swapped flag so if a whole pass has no swaps it stops
+early (the list is already sorted). It also has no print statements, and it
+swaps with Python tuple swapping (a, b = b, a) instead of a "swap" step.
+Because of the early exit, its best case is O(n) instead of always O(n^2).
+
+4.4.f
+I'd keep the early exit since it's a free speedup. To make it work in the
+lab I had to change it to a method that uses self.array instead of taking
+arr as a parameter, and add yield statements so the GUI can show each
+comparison and swap.
+
+==============================
+PART 5: Comparing the Algorithms
+==============================
+
+(Times in seconds, from running python sorting_algorithms.py)
+
+5.3.a  selection_sort()
+  100 items:    0.0004
+  1,000 items:  0.0374
+  10,000 items: 4.0688
+
+5.3.b  insertion_sort()
+  100 items:    0.0004
+  1,000 items:  0.0415
+  10,000 items: 5.2638
+
+5.3.c  bubble_sort()
+  100 items:    0.0006
+  1,000 items:  0.0723
+  10,000 items: 8.8785
+
+5.3.d
+All three are O(n^2), and you can see it: every time the list gets 10x
+bigger, the time goes up about 100x (10^2), which is exactly what n^2
+predicts. But Big O only tells you how runtime grows, not how fast it
+actually is. It drops the constants, so two O(n^2) algorithms can still be
+really different in real life. Bubble sort was the slowest by far (about 2x
+selection sort at 10,000 items) because it does a swap every time two
+neighbors are out of order, while selection sort only does one swap per
+pass. Insertion sort also does a lot of swaps on random data, so it landed
+in between. Like Obama said, bubble sort is the wrong way to go.
