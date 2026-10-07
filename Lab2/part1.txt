@@ -1,0 +1,17 @@
+Esteban Jimenez Sierra
+Lab 2, Part 1 answers
+
+a. How do we access values from the Preferences file?
+gameData.py imports the class with "from preferences import Preferences". Then we use dot notation on the class itself, like Preferences.NUM_ROWS or Preferences.MAX_FOOD. We do not need to make a Preferences object.
+
+b. What type is self.board?
+A list. It is a 2D list (a list of lists) that stores the whole grid.
+
+c. What type is each element of self.board?
+Each element of self.board is a list (one row of the board). Each element inside those row lists is a Cell object.
+
+d. How do we access a cell on the board?
+With two indices, row first then column: self.board[row][col]. Row 0 is the top and col 0 is the left, so self.board[0][0] is the top left cell.
+
+e. How do we change the type of a cell?
+By calling the Cell's methods: become_empty(), become_food(), become_player(), or become_enemy(). For example, self.board[row][col].become_food(). We cannot set the type directly because it is a private attribute inside Cell.

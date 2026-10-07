@@ -1,0 +1,89 @@
+Esteban Jimenez Sierra
+ENGR 221, Lab 2 Pseudocode
+
+=== 2.1 Neighbor Retrieval Methods ===
+
+get_west_neighbor(cell):
+    row = cell's row, col = cell's col
+    if col == 0: return None            (left edge)
+    return board[row][col - 1]
+
+get_east_neighbor(cell):
+    row = cell's row, col = cell's col
+    if col == NUM_COLS - 1: return None (right edge)
+    return board[row][col + 1]
+
+get_north_neighbor(cell):
+    row = cell's row, col = cell's col
+    if row == 0: return None            (top edge)
+    return board[row - 1][col]
+
+get_south_neighbor(cell):
+    row = cell's row, col = cell's col
+    if row == NUM_ROWS - 1: return None (bottom edge)
+    return board[row + 1][col]
+
+=== 2.2 Player Movement Methods ===
+
+move_player_right():
+    new_cell = get_east_neighbor(player)
+    if new_cell is not None:
+        move_player_to_cell(new_cell)
+
+move_player_left():   same, but with get_west_neighbor(player)
+move_player_up():     same, but with get_north_neighbor(player)
+move_player_down():   same, but with get_south_neighbor(player)
+
+(move_player_to_cell already handles eating food and running into an enemy)
+
+=== 2.3 Food Related Methods ===
+
+add_food():
+    pick a random row and col
+    cell = board[row][col]
+    if cell is empty:
+        make cell food
+        add cell to the food list
+        num_empty_cells = num_empty_cells - 1
+    otherwise: do nothing (don't put food on the player, food, or an enemy)
+
+eat_food(cell):
+    remove cell from the food list
+    score = score + 1
+    num_empty_cells = num_empty_cells + 1
+        (player moves into the food cell and leaves its old cell empty)
+
+=== 2.4 Enemy Movement Methods ===
+
+add_enemy():
+    cell = board[NUM_ROWS - 1][NUM_COLS - 1]   (bottom right corner)
+    if cell is an enemy: do nothing and stop
+    if cell is the player:
+        game over
+    else if cell is food:
+        remove cell from the food list   (empty count stays the same)
+    else (cell is empty):
+        num_empty_cells = num_empty_cells - 1
+    make cell an enemy
+    add cell to the enemies list
+
+move_enemy_to_cell(enemy_cell, cell, idx):
+    if cell is an enemy: do nothing and stop (enemies can't stack)
+    if cell is the player:
+        game over
+    else if cell is food:
+        remove cell from the food list
+        num_empty_cells = num_empty_cells + 1
+    make enemy_cell empty
+    make cell an enemy
+    enemies[idx] = cell
+
+move_enemy_left(idx):
+    enemy_cell = enemies[idx]
+    new_cell = get_west_neighbor(enemy_cell)
+    if new_cell is not None:
+        move_enemy_to_cell(enemy_cell, new_cell, idx)
+
+move_enemy_right(idx): same, but with get_east_neighbor
+move_enemy_up(idx):    same, but with get_north_neighbor
+move_enemy_down(idx):  same, but with get_south_neighbor
