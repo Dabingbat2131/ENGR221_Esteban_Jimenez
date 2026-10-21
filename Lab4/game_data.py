@@ -241,19 +241,20 @@ class GameData:
 
         # food: move up and dont remove the tail so it gets longer
         elif cell.is_food():
-            self.get_player().become_body()
-            cell.become_player()
-            self.body.insert(0, cell)
-            self.food.remove(cell)
-            self.score += 1
+            self.get_player().become_body()  # old head turns into body
+            cell.become_player()             # duck square is the new head
+            self.body.insert(0, cell)        # new head goes at the front (body[0])
+            self.food.remove(cell)           # duck is collected so take it off the food list
+            self.score += 1                  # +1 point
+            # no tail removed here, thats how the line grows
 
         # empty: move up and remove the tail
         else:
-            self.get_player().become_body()
-            cell.become_player()
-            self.body.insert(0, cell)
-            tail = self.body.pop()
-            tail.become_empty()
+            self.get_player().become_body()  # old head turns into body
+            cell.become_player()             # empty square is the new head
+            self.body.insert(0, cell)        # new head goes at the front (body[0])
+            tail = self.body.pop()           # take the last square off the end
+            tail.become_empty()              # make it empty so the length stays the same
 
 
     ########################
@@ -310,35 +311,38 @@ class GameData:
 
         # start at the player
         player = self.get_player()
-        player.set_added_to_search_list()
-        cells_to_search.add(player)
+        player.set_added_to_search_list()  # mark the player so we dont add it again
+        cells_to_search.add(player)        # the search starts from the horse
 
+        # keep going until there is nothing left to check
         while not cells_to_search.is_empty():
+            # Queue gives the oldest cell (BFS), Stack gives the newest (DFS)
             current = cells_to_search.remove()
 
             # found a duck
             if current.is_food():
-                return self.get_first_cell_in_path(current)
+                return self.get_first_cell_in_path(current)  # return the first step to it
 
-            # add neighbors we havent checked yet
+            # add neighbors we havent checked yet (up, down, right, left)
             for neighbor in self.get_neighbors(current):
-                if not neighbor.on_search_list():
-                    if not neighbor.is_body():
-                        neighbor.set_search_parent(current)
-                        neighbor.set_added_to_search_list()
-                        cells_to_search.add(neighbor)
+                if not neighbor.on_search_list():  # skip it if we already added it (no looping forever)
+                    if not neighbor.is_body():     # skip my body, cant walk through myself
+                        neighbor.set_search_parent(current)  # breadcrumb: current is who found it
+                        neighbor.set_added_to_search_list()  # mark it as added
+                        cells_to_search.add(neighbor)        # check it later
 
-        # no path found
+        # no path found so just move somewhere random
         return self.get_random_neighbor(player)
     
     def get_first_cell_in_path(self, cell) -> Cell:
         """ Goes back from the duck using search parents and returns
             the cell right next to the player """
 
-        current = cell
+        current = cell  # start at the duck
+        # follow the breadcrumbs back until the next one would be the horse
         while current.get_search_parent() is not self.get_player():
-            current = current.get_search_parent()
-        return current
+            current = current.get_search_parent()  # step back one breadcrumb
+        return current  # this square is right next to the horse = first step
 
     def reset_cells_for_search(self):
         """ Clears all the search info for each cell """
