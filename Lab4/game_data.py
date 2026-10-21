@@ -1,10 +1,8 @@
 """
 Author: Esteban Jimenez Sierra
-Date last updated: 10/21/2026
-Stores all the data for the Duck Collector game: the board, the player's
-body, the food, the score, and the movement mode. Also has the player
-movement logic and the AI mode that uses BFS (Queue) or DFS (Stack) to
-find the closest duck.
+Date: 10/21/2026
+Holds the game data (board, player, ducks, score) and the movement
+and AI search code for the duck game.
 """
 
 import random
@@ -241,32 +239,21 @@ class GameData:
         if not cell or cell.is_body():            
             self.set_game_over()
 
-        # If the cell is food, move forward and grow
+        # food: move up and dont remove the tail so it gets longer
         elif cell.is_food():
-            # The old head becomes part of the body
             self.get_player().become_body()
-            # The food cell becomes the new head
             cell.become_player()
-            # Add the new head to the front of the body list
             self.body.insert(0, cell)
-            # The duck is collected, so take it off the food list
             self.food.remove(cell)
-            # Increment the player's score
             self.score += 1
-            # The tail stays where it is, so the line gets one longer
 
-        # If the cell is empty, move forward and keep the same length
+        # empty: move up and remove the tail
         else:
-            # The old head becomes part of the body
             self.get_player().become_body()
-            # The empty cell becomes the new head
             cell.become_player()
-            # Add the new head to the front of the body list
             self.body.insert(0, cell)
-            # Remove the tail from the end of the body list
-            old_tail = self.body.pop()
-            # The old tail spot is now empty
-            old_tail.become_empty()
+            tail = self.body.pop()
+            tail.become_empty()
 
 
     ########################
@@ -309,9 +296,8 @@ class GameData:
     ##############
 
     def get_next_cell_ai(self) -> Cell:
-        """ Searches for the closest duck using BFS (Queue) or DFS (Stack)
-            and returns the next cell the player should move to on the path
-            to it. If no path is found, returns a random neighbor. """
+        """ Uses BFS or DFS to find a duck and returns the next cell to
+            move to. If it cant find one it returns a random neighbor. """
         
         # Prepare all the tiles to search
         self.reset_cells_for_search()
@@ -322,39 +308,34 @@ class GameData:
         else:
             cells_to_search = Queue()
 
-        # Start the search from the player
+        # start at the player
         player = self.get_player()
         player.set_added_to_search_list()
         cells_to_search.add(player)
 
-        # Keep searching until there is nothing left to check
         while not cells_to_search.is_empty():
-            # Grab the next cell (Queue = oldest, Stack = newest)
             current = cells_to_search.remove()
 
-            # Found a duck, so return the first step toward it
+            # found a duck
             if current.is_food():
                 return self.get_first_cell_in_path(current)
 
-            # Otherwise add every valid neighbor we haven't seen yet
+            # add neighbors we havent checked yet
             for neighbor in self.get_neighbors(current):
                 if not neighbor.on_search_list():
                     if not neighbor.is_body():
-                        # Remember where we came from (breadcrumb)
                         neighbor.set_search_parent(current)
                         neighbor.set_added_to_search_list()
                         cells_to_search.add(neighbor)
 
-        # If we get here, no path was found
+        # no path found
         return self.get_random_neighbor(player)
     
     def get_first_cell_in_path(self, cell) -> Cell:
-        """ Starting from the food cell the search found, follows the
-            search parents back toward the player and returns the cell
-            right next to the player on that path (the first step). """
+        """ Goes back from the duck using search parents and returns
+            the cell right next to the player """
 
         current = cell
-        # Walk back until the next parent would be the player
         while current.get_search_parent() is not self.get_player():
             current = current.get_search_parent()
         return current
