@@ -1,0 +1,39 @@
+Esteban Jimenez Sierra
+ENGR 221
+Homework 4 Answers
+
+Part 1
+
+1.2.a
+The player's location is stored in self.body, which is a list of Cell objects. The first cell in the list (index 0) is the head (the player) and the rest of the cells are the body (the ducks following it).
+
+1.2.b
+get_player() returns the head, which is self.body[0]. get_tail() returns the end of the line, which is self.body[-1].
+
+1.2.c
+There are 5 modes: GOING_NORTH, GOING_SOUTH, GOING_EAST, and GOING_WEST move the player one cell in that direction every turn and it keeps going that way until you change it (arrow keys or i/j/k/l). AI_MODE (press a) lets the game pick the next cell for you each turn using search.
+
+1.2.d
+get_next_cell() returns the neighbor of the player in whatever direction the current mode is (north, south, east, or west). If that spot is off the map it returns None. get_next_cell_ai() right now just returns a random neighbor of the player, so in AI mode the player moves around randomly.
+
+Part 2
+
+2.2.1.a
+Stack add: at the end.
+
+2.2.1.b
+Stack remove: from the end (the last thing added comes out first).
+
+2.2.1.c
+Queue add: at the end.
+
+2.2.1.d
+Queue remove: from the beginning (the first thing added comes out first).
+
+Part 3
+
+3.2.a
+With DFS the player doesn't really go for the ducks. When I ran it, the horse got stuck going back and forth between the same two cells and barely collected anything. This happens because DFS goes as deep as it can down one direction before trying others, so the path it finds is long and winding instead of direct. The search runs again every turn, and from the new spot DFS finds a different long path whose first step points back where it came from, so it just keeps flipping back and forth.
+
+3.2.b
+BFS finds the shorter path. BFS uses a queue so it checks all the cells 1 step away, then all the cells 2 steps away, and so on, like ripples in water. That means the first duck it reaches is always the closest one by the shortest path. DFS uses a stack so it just follows one path as far as it can, so the first duck it finds can be really far away or on a really long path.
